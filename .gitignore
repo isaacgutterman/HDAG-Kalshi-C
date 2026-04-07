@@ -1,0 +1,45 @@
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Python bytecode, caches, and build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+build/
+dist/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Local project data
+data/*
+!data/.gitkeep
+
+# OS/editor noise
+.DS_Store
+.idea/
+.vscode/

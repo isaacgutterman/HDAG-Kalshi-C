@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kalshi-pipeline"
+version = "0.1.0"
+description = "Professional Python scaffold for authenticated Kalshi market data ingestion."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "kalshi_python_async",
+    "cryptography",
+    "httpx",
+    "websockets",
+    "pydantic",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "coverage",
+    "bandit",
+    "pip-audit",
+]
+
+[tool.setuptools]
+packages = ["app", "app.ingest", "app.storage", "app.services"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
