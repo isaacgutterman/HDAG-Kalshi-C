@@ -68,13 +68,18 @@ def test_market_repository_upsert_inserts_and_updates_market(tmp_path: Path) -> 
 async def test_sync_markets_paginates_and_updates_checkpoint(tmp_path: Path) -> None:
     db_path = tmp_path / "markets.sqlite3"
     requested_cursors: list[str | None] = []
+    requested_params: list[dict[str, list[str]]] = []
 
     async def handler(request: httpx.Request) -> httpx.Response:
         query_params = parse_qs(urlparse(str(request.url)).query)
         cursor = query_params.get("cursor", [None])[0]
         assert request.url.path == "/trade-api/v2/markets"
         assert query_params["limit"] == ["100"]
+        assert query_params["status"] == ["open"]
+        assert query_params["min_close_ts"] == ["1712577600"]
+        assert query_params["max_close_ts"] == ["1715169600"]
         requested_cursors.append(cursor)
+        requested_params.append(query_params)
 
         if cursor is None:
             return httpx.Response(
@@ -128,6 +133,9 @@ async def test_sync_markets_paginates_and_updates_checkpoint(tmp_path: Path) -> 
                 market_repository=market_repository,
                 checkpoint_repository=checkpoint_repository,
                 page_size=100,
+                status="open",
+                min_close_ts=1_712_577_600,
+                max_close_ts=1_715_169_600,
             )
 
         first_market = market_repository.get("FED-2026-RATE-HIKE")
@@ -135,6 +143,7 @@ async def test_sync_markets_paginates_and_updates_checkpoint(tmp_path: Path) -> 
         checkpoint = checkpoint_repository.get("markets_sync_cursor")
 
     assert requested_cursors == [None, "cursor-002"]
+    assert len(requested_params) == 2
     assert result.pages_processed == 2
     assert result.markets_upserted == 2
     assert result.checkpoint_value == ""
@@ -144,3 +153,75 @@ async def test_sync_markets_paginates_and_updates_checkpoint(tmp_path: Path) -> 
     assert first_market.last_price == 57
     assert second_market is not None
     assert second_market.event_ticker == "CPI-2026"
+
+
+@pytest.mark.anyio
+async def test_sync_markets_watchlist_mode_uses_tickers_without_discovery_filters(
+    tmp_path: Path,
+) -> None:
+    db_path = tmp_path / "markets.sqlite3"
+    requested_params: list[dict[str, list[str]]] = []
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        query_params = parse_qs(urlparse(str(request.url)).query)
+        requested_params.append(query_params)
+        assert request.url.path == "/trade-api/v2/markets"
+        assert query_params["limit"] == ["50"]
+        assert query_params["tickers"] == ["FED-2026-RATE-HIKE,CPI-2026-HOT"]
+        assert "status" not in query_params
+        assert "min_close_ts" not in query_params
+        assert "max_close_ts" not in query_params
+        assert "cursor" not in query_params
+
+        return httpx.Response(
+            200,
+            json={
+                "markets": [
+                    {
+                        "ticker": "FED-2026-RATE-HIKE",
+                        "event_ticker": "FED-2026-RATE",
+                        "title": "Rate hike yes",
+                        "status": "active",
+                        "last_price": 57,
+                        "updated_time": "2026-04-08T12:00:00Z",
+                    },
+                    {
+                        "ticker": "CPI-2026-HOT",
+                        "event_ticker": "CPI-2026",
+                        "title": "Hot CPI print",
+                        "status": "active",
+                        "last_price": 44,
+                        "updated_time": "2026-04-08T12:05:00Z",
+                    },
+                ],
+                "cursor": None,
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+
+    with get_sqlite_connection(db_path) as connection:
+        bootstrap_schema(connection)
+        market_repository = MarketRepository(connection)
+        checkpoint_repository = CheckpointRepository(connection)
+        checkpoint_repository.set("markets_sync_cursor", "cursor-existing")
+
+        async with KalshiHttpClient(
+            base_url="https://demo-api.kalshi.co",
+            transport=transport,
+        ) as client:
+            result = await sync_markets(
+                client=client,
+                market_repository=market_repository,
+                checkpoint_repository=checkpoint_repository,
+                page_size=50,
+                watchlist_tickers=["FED-2026-RATE-HIKE", "CPI-2026-HOT"],
+            )
+
+        checkpoint = checkpoint_repository.get("markets_sync_cursor")
+
+    assert len(requested_params) == 1
+    assert result.pages_processed == 1
+    assert result.markets_upserted == 2
+    assert checkpoint is not None
+    assert checkpoint.value == "cursor-existing"
