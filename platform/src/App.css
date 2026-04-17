@@ -1,0 +1,211 @@
+/* ── Reset & base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0f172a;
+  --surface:   #1e293b;
+  --border:    #334155;
+  --text:      #f1f5f9;
+  --muted:     #94a3b8;
+  --green:     #22c55e;
+  --green-dim: #166534;
+  --red:       #ef4444;
+  --red-dim:   #7f1d1d;
+  --blue:      #3b82f6;
+  --yellow:    #f59e0b;
+  --radius:    8px;
+  --font:      'Inter', system-ui, -apple-system, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────────── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.02em; color: var(--text); }
+.header .subtitle { font-size: 12px; color: var(--muted); }
+
+.tabs { display: flex; gap: 4px; }
+.tab {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.tab:hover { background: var(--border); color: var(--text); }
+.tab.active { background: var(--blue); color: #fff; }
+
+.content { flex: 1; padding: 20px 24px; }
+
+/* ── Dashboard grid ───────────────────────────────────────────────────────── */
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.row { display: flex; gap: 16px; flex-wrap: wrap; }
+.section { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Cards ────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.metric-card { text-align: center; }
+.metric-value { font-size: 24px; font-weight: 700; line-height: 1.2; }
+.metric-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.positive { color: var(--green); }
+.negative { color: var(--red);   }
+.neutral  { color: var(--text);  }
+
+/* ── Tables ───────────────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+tbody td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  white-space: nowrap;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(255,255,255,0.03); }
+
+.badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-yes  { background: var(--green-dim); color: var(--green); }
+.badge-no   { background: var(--red-dim);   color: var(--red);   }
+.badge-open { background: rgba(59,130,246,0.15); color: var(--blue); }
+
+/* ── Forms ────────────────────────────────────────────────────────────────── */
+.form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group label { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+input, select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 13px;
+  outline: none;
+  width: 140px;
+}
+input:focus, select:focus { border-color: var(--blue); }
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+.btn {
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary  { background: var(--blue);   color: #fff; }
+.btn-danger   { background: var(--red);    color: #fff; }
+.btn-success  { background: var(--green);  color: #000; }
+.btn-ghost    { background: var(--border); color: var(--text); }
+
+/* ── Risk gauge ───────────────────────────────────────────────────────────── */
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* ── Kill switch ──────────────────────────────────────────────────────────── */
+.kill-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius);
+  border: 2px solid var(--red);
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.kill-btn:hover, .kill-btn.active { background: var(--red); color: #fff; }
+.kill-btn.killed { background: var(--red-dim); color: var(--red); }
+
+/* ── Toast ────────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 999;
+  animation: fadein 0.2s ease;
+}
+.toast-success { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+.toast-error   { background: var(--red-dim);   color: var(--red);   border: 1px solid var(--red);   }
+
+@keyframes fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Misc ─────────────────────────────────────────────────────────────────── */
+.empty { color: var(--muted); font-size: 13px; text-align: center; padding: 24px 0; }
+.error-box { background: var(--red-dim); border: 1px solid var(--red); color: var(--red); padding: 10px 14px; border-radius: 6px; font-size: 13px; }
+.spacer { flex: 1; }
